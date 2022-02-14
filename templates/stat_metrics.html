@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Stat-metrics</title>
+<script type="text/javascript" src="/static/news.js"></script>
+<link rel="stylesheet" href="/static/news.css" type="text/css">
+<!-- Table -->
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/dataTables.bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.0/css/dataTables.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css">
+<body class="stat_metric_body">
+
+<!-- Flash Message -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} message">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+<!-------------->
+<div class="stat_div">
+    <h2>News Articles Classification</h2>
+
+    <h3>Predicted Outcomes: </h3>
+    <table id="config_id" class="display cell-border" style="width:100%">
+        <caption style="text-align:center; font-weight: bold;">Table 1: Predictions</caption>
+        <thead style="width:100%">
+        <tr>
+            <th>Id</th>
+            <th>News Articles</th>
+            <th>Predicted Labels</th>
+            {% if 'metrics' in table %}
+                <th>Actual Labels</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in range(table['data'] | length) %}
+        <tr>
+            <td>{{ i }}</td>
+            <td>{{ table['data'][i] }}</td>
+            <td>
+                {{ table['pred'][i] }}
+            </td>
+            {% if 'metrics' in table %}
+                <td>{{ table['actual'][i] }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% if 'metrics' in table %}
+<div class="metric_div">
+    <h2>Metrics</h2>
+
+    <h4>1. Accuracy : {{ '%0.2f' | format(table['metrics']['accuracy'] * 100) }} %</h4>
+
+    <!-- Confusion Matrix -->
+    <h4>2. Confusion Matrix: </h4>
+    <table id="example1" class="display nowrap cell-border" style="width:100%">
+        <caption style="text-align:center; font-weight: bold;">Table 2: Confusion matrix</caption>
+        <thead>
+            <tr>
+<!--                <th colspan="2" style="border-bottom: 0px;"></th>-->
+                <th style="border-bottom: 0px; width: 50px;"></th>
+                <th style="border-bottom: 0px; width: 50px;"></th>
+                {% for i in range(table['metrics']['confusion_matrix'] | length) %}
+                    <th>Predicted</th>
+                {% endfor %}
+            </tr>
+            <tr>
+<!--                <th colspan="2" style="border-bottom: 0px;"></th>-->
+                <th style="border-top: 0px; border-right: 0px; width: 50px;"></th>
+                <th style="border-top: 0px; border-left: 0px; width: 50px;"></th>
+                {% for key in table['labels'] %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(table['labels'] | length) %}
+                <tr>
+                    <td>Actual</td>
+                    <td>{{ table['labels'][i] }}</td>
+                    {% for value in table['metrics']['confusion_matrix'][i] %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <!-- Classification Report -->
+    <h4>3. Classification Report: </h4>
+    <table id="example2" class="display nowrap cell-border" style="width:100%">
+        <caption style="text-align:center; font-weight: bold;">Table 3: Classification report</caption>
+        <thead>
+            <tr>
+                <th></th>
+                {% for key in table['metrics']['classification_report'][(table['metrics']['classification_report'].keys() | list)[0]].keys() %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for key in table['metrics']['classification_report'].keys() %}
+                <tr>
+                    <td>{{ key }}</td>
+                    {% for value in table['metrics']['classification_report'][key].values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+</div>
+{% endif %}
+
+</body>
+
+<script>
+$('#config_id').DataTable( {
+    'fixedHeader': true,
+    "responsive": true,
+    "scrollX": true,
+    'lengthMenu': [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+    'lengthChange': true,
+    'dom': 'Blfrtip',
+    'pagingType': "full_numbers",
+    'buttons': [ 'copy', 'excel', 'pdf', 'csv', 'print', 'colvis' ]
+});
+
+$('#example1').DataTable( {
+    'fixedHeader': false,
+    "responsive": true,
+    'lengthMenu': [[-1], ["All"]],
+    'lengthChange': true,
+    'dom': 'Blfrtip',
+    'scrollX': true,
+    "pagingType": "full_numbers",
+    'buttons': [ 'copy', 'excel', 'pdf', 'csv', 'print', 'colvis' ]
+});
+
+$('#example2').DataTable( {
+    'fixedHeader': false,
+    "responsive": true,
+    'lengthMenu': [[-1], ["All"]],
+    'lengthChange': true,
+    'dom': 'Blfrtip',
+    'scrollX': true,
+    "pagingType": "full_numbers",
+    'buttons': [ 'copy', 'excel', 'pdf', 'csv', 'print', 'colvis' ]
+});
+
+</script>
+
+</html>
