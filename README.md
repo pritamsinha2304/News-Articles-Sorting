@@ -7,11 +7,11 @@ Every day millions of news articles got created and broadcast over the internet 
 This web app is built on the basis on the title and to predict news articles on user's input. The page is divided into 3 sections, which is based on user's input preference. Each section is well-defined and users can give inputs. Each section on predicting completely and successfully, will go to the metrics page, where all the metrics of the prediction results are shown.
 
 
-### Options
+### Input Data Selection Options
 
 The web app input options is divided into 3 sections/forms. Each section deals with specific types of user inputs and can handles only that file format. The idea is to seperate the form based ont he quantity of users's input.
 1. Single Data: This is used only when the user have single article to predict.
 2. Multiple/Batch Data: This is used when the user possess multiple/batch of articles he/she wants to predict. Only csv file format is supported here.
 3. Demo Data: This is used in case the user doesn't have any data. The user just to look around the app and see what the app has to offer.
 
-
+![HomePage](/app images/homepage.png)
