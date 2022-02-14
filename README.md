@@ -1,4 +1,4 @@
-# News-Articles-Sorting
+# News Articles Sorting
 
 ## Introduction
 
@@ -14,4 +14,4 @@ The web app input options is divided into 3 sections/forms. Each section deals w
 2. Multiple/Batch Data: This is used when the user possess multiple/batch of articles he/she wants to predict. Only csv file format is supported here.
 3. Demo Data: This is used in case the user doesn't have any data. The user just to look around the app and see what the app has to offer.
 
-![HomePage](/app images/homepage.png)
+<img src="/app images/homepage.png"/>
