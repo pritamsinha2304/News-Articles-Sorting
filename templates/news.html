@@ -147,6 +147,9 @@
         $('#single').hide()
         $('#multiple').hide()
         $('#demo').hide()
+        $("input[type$='radio']").each(function(i) {
+            this.checked = false;
+        });
         $("input[type$='radio']").click(function(){
             var test = $(this).val()
             if(test === 'single'){
