@@ -24,6 +24,8 @@ from werkzeug.utils import secure_filename
 
 from form import SingleDataUploadForm, SingleMultipleChoiceForm, MultipleDataUploadForm, DemoForm
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 # Setting random ID
 rand_id = randrange(100000)
 
@@ -327,7 +329,10 @@ def home():
             info_dict['metrics'] = metrics
             info_dict['actual'] = [optional]
         encrypted_info_dict = json.dumps(info_dict).encode('utf-8')
-        flash(f'News Text and Actual Label uploaded successfully', 'success')
+        if optional != '':
+            flash(f'News Text and Actual Label uploaded successfully', 'success')
+        else:
+            flash(f'News Text uploaded successfully', 'success')
         logging.info(f'user#{rand_id}: Single Form Encoded Data Dictionary Sent')
         return redirect(url_for('stat_metrics', data_dict=b64encode(encrypted_info_dict)))
 
@@ -435,13 +440,18 @@ def home():
             df_labels['Category'] = df_labels['Category'].astype(str)
             logging.info(f'user#{rand_id}: No. of rows of label dataset uploaded: {df_labels.shape[0]}')
             logging.info(f'user#{rand_id}: No. of columns of label dataset uploaded: {df_labels.shape[1]}')
-            logging.info(f"user#{rand_id}: Datatype of the column of the label dataset uploaded: {df_test['Category'].dtype}")
+            logging.info(f"user#{rand_id}: Datatype of the column of the label dataset uploaded: {df_labels['Category'].dtype}")
             metrics_multi = multiple_upload.metrics(label_multi.tolist(), df_labels['Category'].tolist())
             # print(metrics_multi['classification_report'])
             info_dict['metrics'] = metrics_multi
             info_dict['actual'] = df_labels['Category'].tolist()
         encrypted_info_dict = json.dumps(info_dict).encode('utf-8')
-        flash(f'{secure_filename(test.filename)} and {secure_filename(actual_labels.filename)} uploaded successfully', 'success')
+        if secure_filename(actual_labels.filename) != '':
+            flash(f'{secure_filename(test.filename)} and {secure_filename(actual_labels.filename)} uploaded successfully', 'success')
+        else:
+            flash(
+                f'{secure_filename(test.filename)} uploaded successfully',
+                'success')
         logging.info(f'user#{rand_id}: Multiple Form Encoded Data Dictionary Sent')
         return redirect(url_for('stat_metrics', data_dict=b64encode(encrypted_info_dict)))
 
